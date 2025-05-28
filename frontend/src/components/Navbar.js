@@ -1,30 +1,18 @@
-import { Link } from "react-router-dom";
-import { Navbar, Nav, Container } from "react-bootstrap";
+import React from "react";
+import { Navbar, Container } from "react-bootstrap";
+import { FaBars } from "react-icons/fa";
 
-function Header() {
+function TopNavbar({ toggleSidebar }) {
   return (
-    <Navbar bg="dark" variant="dark" expand="lg">
-      <Container>
-        <Navbar.Brand as={Link} to="/">
-          MyShop
-        </Navbar.Brand>
-        <Navbar.Toggle />
-        <Navbar.Collapse>
-          <Nav className="ms-auto">
-            <Nav.Link as={Link} to="/cart">
-              Cart
-            </Nav.Link>
-            <Nav.Link as={Link} to="/orders">
-              Orders
-            </Nav.Link>
-            <Nav.Link as={Link} to="/login">
-              Login
-            </Nav.Link>
-          </Nav>
-        </Navbar.Collapse>
+    <Navbar bg="primary" variant="dark" className="top-navbar">
+      <Container fluid>
+        <button className="btn btn-link text-white" onClick={toggleSidebar}>
+          <FaBars size={20} />
+        </button>
+        <Navbar.Brand>MyShop</Navbar.Brand>
       </Container>
     </Navbar>
   );
 }
 
-export default Header;
+export default TopNavbar;
