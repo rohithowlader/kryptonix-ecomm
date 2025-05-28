@@ -4,10 +4,16 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // On mount, try to restore user from localStorage token
     const token = localStorage.getItem("token");
-    if (token) setUser({ token }); // Could decode token if you want user info
+    if (token) {
+      // Optionally decode token to get user info or just mark user as logged in
+      setUser({ token });
+    }
+    setLoading(false);
   }, []);
 
   const login = (token) => {
@@ -22,7 +28,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
-      {children}
+      {!loading ? children : <div>Loading...</div>}
     </AuthContext.Provider>
   );
 };

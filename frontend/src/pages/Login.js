@@ -18,6 +18,8 @@ function Login() {
     try {
       const { data } = await API.post("/auth/login", form);
       login(data.token);
+      localStorage.setItem("token", data.token);
+      //   setAuth({ token, isAuthenticated: true });
       navigate("/");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");

@@ -5,6 +5,7 @@ import { AuthContext } from "../context/AuthContext";
 const PrivateRoute = ({ children }) => {
   const { user } = useContext(AuthContext);
 
+  // If user is null, redirect to login
   if (!user) return <Navigate to="/login" replace />;
 
   return children;

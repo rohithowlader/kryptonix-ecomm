@@ -3,11 +3,11 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
-// import Cart from "./pages/Cart";
+import Cart from "./pages/Cart";
 // import Orders from "./pages/Orders";
 import Layout from "./components/Layout";
 import { AuthProvider } from "./context/AuthContext";
-// import PrivateRoute from "./components/PrivateRoute";
+import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
   return (
@@ -20,7 +20,7 @@ function App() {
             <Route path="/register" element={<Register />} />
 
             {/* Protected Routes */}
-            {/* <Route
+            <Route
               path="/cart"
               element={
                 <PrivateRoute>
@@ -28,7 +28,7 @@ function App() {
                 </PrivateRoute>
               }
             />
-            <Route
+            {/* <Route
               path="/orders"
               element={
                 <PrivateRoute>
