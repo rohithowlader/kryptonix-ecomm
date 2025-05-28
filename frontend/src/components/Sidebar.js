@@ -4,7 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import {
   FaHome,
   FaShoppingCart,
-  FaUser,
+  //   FaUser,
   FaSignOutAlt,
   FaSignInAlt,
   FaUserPlus,
