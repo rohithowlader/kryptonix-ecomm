@@ -7,6 +7,31 @@ const Order = require("../models/Order");
 const Cart = require("../models/cartModel");
 const Product = require("../models/Product");
 
+exports.getUserOrders = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const skip = (page - 1) * limit;
+
+    const totalOrders = await Order.countDocuments({ user: userId });
+    const orders = await Order.find({ user: userId })
+      .populate("products.product")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.json({
+      orders,
+      page,
+      totalPages: Math.ceil(totalOrders / limit),
+    });
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    res.status(500).json({ message: "Failed to fetch orders" });
+  }
+};
+
 // Create Stripe Payment Intent for full cart
 exports.createPaymentIntent = async (req, res) => {
   try {

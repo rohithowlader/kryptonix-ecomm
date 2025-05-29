@@ -12,5 +12,5 @@ router.post(
 
 // Place order after payment success
 router.post("/order/place", authMiddleware, orderController.placeOrder);
-
+router.get("/orders", authMiddleware, orderController.getUserOrders);
 module.exports = router;

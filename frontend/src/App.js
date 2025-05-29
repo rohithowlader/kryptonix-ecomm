@@ -4,7 +4,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
 import Cart from "./pages/Cart";
-// import Orders from "./pages/Orders";
+import Orders from "./pages/Orders";
 import Layout from "./components/Layout";
 import { AuthProvider } from "./context/AuthContext";
 import PrivateRoute from "./components/PrivateRoute";
@@ -28,14 +28,14 @@ function App() {
                 </PrivateRoute>
               }
             />
-            {/* <Route
+            <Route
               path="/orders"
               element={
                 <PrivateRoute>
                   <Orders />
                 </PrivateRoute>
               }
-            /> */}
+            />
           </Routes>
         </Layout>
       </AuthProvider>
