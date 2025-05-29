@@ -9,7 +9,7 @@ function TopNavbar({ toggleSidebar }) {
         <button className="btn btn-link text-white" onClick={toggleSidebar}>
           <FaBars size={20} />
         </button>
-        <Navbar.Brand>MyShop</Navbar.Brand>
+        <Navbar.Brand>Kyptronix</Navbar.Brand>
       </Container>
     </Navbar>
   );
