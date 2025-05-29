@@ -7,13 +7,122 @@ import {
   Alert,
   Card,
   ListGroup,
+  Form,
 } from "react-bootstrap";
 import API from "../api";
+import { loadStripe } from "@stripe/stripe-js";
+import {
+  Elements,
+  CardElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
+import { useNavigate } from "react-router-dom";
+
+const stripePromise = loadStripe(
+  "pk_test_51QHjAHRwFKrcZYFWWbNjoWah2HlW0yIghlzDiel5qtmn2Eudof0fzMGtOwSP1QpxDz1C2SYixo52vD6FKEBfRCAl00VHc3BUfw"
+);
+
+function CheckoutForm({ cartItems, onOrderSuccess }) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [error, setError] = useState("");
+  const [processing, setProcessing] = useState(false);
+  const [clientSecret, setClientSecret] = useState("");
+  const [totalPrice, setTotalPrice] = useState(0);
+
+  useEffect(() => {
+    // Fetch client secret from backend when component mounts or cart changes
+    const fetchPaymentIntent = async () => {
+      try {
+        const { data } = await API.post("/order/create-payment-intent");
+        setClientSecret(data.clientSecret);
+        setTotalPrice(data.totalPrice);
+      } catch (err) {
+        setError("Failed to initiate payment");
+      }
+    };
+    fetchPaymentIntent();
+  }, [cartItems]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setProcessing(true);
+    setError("");
+
+    if (!stripe || !elements) {
+      setError("Stripe has not loaded yet");
+      setProcessing(false);
+      return;
+    }
+
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) {
+      setError("Card Element not found");
+      setProcessing(false);
+      return;
+    }
+
+    // Confirm card payment
+    const { paymentIntent, error: stripeError } =
+      await stripe.confirmCardPayment(clientSecret, {
+        payment_method: { card: cardElement },
+      });
+
+    if (stripeError) {
+      setError(stripeError.message);
+      setProcessing(false);
+      return;
+    }
+
+    if (paymentIntent.status === "succeeded") {
+      try {
+        // Call backend to place order after successful payment
+        const res = await API.post("/order/place", {
+          paymentIntentId: paymentIntent.id,
+        });
+        onOrderSuccess(res.data.order);
+      } catch (placeOrderError) {
+        setError(
+          placeOrderError.response?.data?.message || "Failed to place order"
+        );
+      }
+    } else {
+      setError("Payment not successful");
+    }
+    setProcessing(false);
+  };
+
+  return (
+    <>
+      {error && <Alert variant="danger">{error}</Alert>}
+      <Form onSubmit={handleSubmit}>
+        <CardElement
+          options={{
+            style: {
+              base: { fontSize: "16px", color: "#495057" },
+              invalid: { color: "#fa755a" },
+            },
+          }}
+        />
+        <Button
+          variant="success"
+          type="submit"
+          disabled={!stripe || processing || cartItems.length === 0}
+          className="mt-3 w-100"
+        >
+          {processing ? "Processing..." : `Pay $${totalPrice.toFixed(2)}`}
+        </Button>
+      </Form>
+    </>
+  );
+}
 
 function CartPage() {
   const [cartItems, setCartItems] = useState([]);
   const [error, setError] = useState("");
-
+  const [orderPlaced, setOrderPlaced] = useState(null);
+  const navigate = useNavigate();
   const fetchCart = async () => {
     try {
       const { data } = await API.get("/cart");
@@ -47,6 +156,26 @@ function CartPage() {
   useEffect(() => {
     fetchCart();
   }, []);
+
+  const handleOrderSuccess = (order) => {
+    setOrderPlaced(order);
+    setCartItems([]);
+  };
+
+  if (orderPlaced) {
+    setTimeout(() => {
+      navigate("/"); // Redirect to home page after 5 seconds
+    }, 5000);
+    return (
+      <Container className="mt-5">
+        <Alert variant="success">
+          <h4>Order placed successfully!</h4>
+          <p>Order ID: {orderPlaced._id}</p>
+          <p>Total Paid: ${orderPlaced.totalPrice.toFixed(2)}</p>
+        </Alert>
+      </Container>
+    );
+  }
 
   return (
     <Container className="mt-5">
@@ -107,13 +236,12 @@ function CartPage() {
                 </ListGroup.Item>
               </ListGroup>
               <Card.Body>
-                <Button
-                  variant="success"
-                  className="w-100"
-                  disabled={cartItems.length === 0}
-                >
-                  Place Order
-                </Button>
+                <Elements stripe={stripePromise}>
+                  <CheckoutForm
+                    cartItems={cartItems}
+                    onOrderSuccess={handleOrderSuccess}
+                  />
+                </Elements>
               </Card.Body>
             </Card>
           </Col>
