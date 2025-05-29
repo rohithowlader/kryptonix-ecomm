@@ -23,18 +23,24 @@ function CartPage() {
     }
   };
 
-  const removeFromCart = async (productId) => {
+  const removeFromCart = async (cartProductId) => {
     try {
-      await API.delete(`/cart/${productId}`);
-      setCartItems(cartItems.filter((item) => item._id !== productId));
+      await API.delete(`/cart/${cartProductId}`);
+      setCartItems(cartItems.filter((item) => item._id !== cartProductId));
     } catch (err) {
       setError("Failed to remove item");
     }
   };
 
-  // Calculate total price
+  // Calculate total price considering quantity
   const totalPrice = cartItems.reduce(
-    (acc, item) => acc + Number(item.price),
+    (acc, item) => acc + Number(item.product.price) * (item.quantity || 1),
+    0
+  );
+
+  // Calculate total items (sum of quantities)
+  const totalItems = cartItems.reduce(
+    (acc, item) => acc + (item.quantity || 1),
     0
   );
 
@@ -50,22 +56,30 @@ function CartPage() {
         <p>Your cart is empty</p>
       ) : (
         <Row>
-          {/* Left Panel: Cart Items */}
           <Col md={8}>
             {cartItems.map((item) => (
               <Card key={item._id} className="mb-3">
                 <Row className="g-0 align-items-center">
                   <Col md={4}>
                     <Card.Img
-                      src={item.image}
-                      alt={item.name}
+                      src={item.product.image}
+                      alt={item.product.name}
                       style={{ height: "150px", objectFit: "cover" }}
                     />
                   </Col>
                   <Col md={8}>
                     <Card.Body>
-                      <Card.Title>{item.name}</Card.Title>
-                      <Card.Text>${Number(item.price).toFixed(2)}</Card.Text>
+                      <Card.Title>{item.product.name}</Card.Title>
+                      <Card.Text>
+                        Price: ${Number(item.product.price).toFixed(2)}
+                        <br />
+                        Quantity: {item.quantity || 1}
+                        <br />
+                        Total: $
+                        {(
+                          Number(item.product.price) * (item.quantity || 1)
+                        ).toFixed(2)}
+                      </Card.Text>
 
                       <Button
                         variant="danger"
@@ -81,13 +95,12 @@ function CartPage() {
             ))}
           </Col>
 
-          {/* Right Panel: Order Summary */}
           <Col md={4}>
             <Card>
               <Card.Header>Order Summary</Card.Header>
               <ListGroup variant="flush">
                 <ListGroup.Item>
-                  <strong>Total Items:</strong> {cartItems.length}
+                  <strong>Total Items:</strong> {totalItems}
                 </ListGroup.Item>
                 <ListGroup.Item>
                   <strong>Total Price:</strong> ${totalPrice.toFixed(2)}
