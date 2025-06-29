@@ -4,6 +4,7 @@ const connectDB = require("./config/db");
 const cors = require("cors");
 const cartRoutes = require("./routes/cartRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+const path = require('path');
 dotenv.config();
 connectDB();
 
