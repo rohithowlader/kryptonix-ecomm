@@ -19,7 +19,7 @@ app.use("/api", orderRoutes);
 
 // app.use("/api/orders", require("./routes/orderRoutes"));
 // app.use("/api/payment", require("./routes/paymentRoutes"));
-app.get("/health", (req, res) => {
+app.get("/", (req, res) => {
   res.status(200).json({
     status: "ok",
     message: "Server is healthy",
